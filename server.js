@@ -145,4 +145,5 @@ app.delete("/api/notes/:id", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server chal raha hai: http://localhost:${PORT}`);
-});
+
+
