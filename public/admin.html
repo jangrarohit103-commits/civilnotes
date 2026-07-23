@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - CivilNotes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+  body { background: #f6f7fb; color: #0f1b3d; padding-bottom: 40px; }
+  header {
+    background: #0f1b3d;
+    color: white;
+    padding: 20px 16px;
+    text-align: center;
+  }
+  header h1 { font-size: 18px; }
+
+  .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+
+  .form-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; margin-top: 14px; }
+  label:first-child { margin-top: 0; }
+  input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    outline: none;
+    background: white;
+  }
+  textarea { min-height: 100px; resize: vertical; }
+  input:focus, textarea:focus, select:focus { border-color: #2563eb; }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 20px;
+    cursor: pointer;
+  }
+  button:disabled { background: #a7c0f0; }
+
+  #status { margin-top: 12px; font-size: 13px; text-align: center; min-height: 18px; }
+  .error { color: #e74c3c; }
+  .success { color: #27ae60; }
+
+  .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: #999;
+    font-size: 13px;
+    text-decoration: none;
+  }
+
+  .note-item {
+    background: white;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+  }
+  .note-item button.delete-btn {
+    width: auto;
+    margin: 0;
+    background: #e74c3c;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .section-title { font-size: 14px; color: #555; margin: 24px 0 10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔐 Admin Panel — Naya Note Add Karo</h1>
+</header>
+
+<div class="container">
+  <div class="form-card">
+    <label>Admin Password</label>
+    <input type="password" id="password" placeholder="Password daalo">
+
+    <label>Title</label>
+    <input type="text" id="title" placeholder="e.g. Soil Mechanics - Unit 1">
+
+    <label>Subject</label>
+    <input type="text" id="subject" placeholder="e.g. Geotechnical Engineering">
+
+    <div class="row-2">
+      <div>
+        <label>Year</label>
+        <select id="year">
+          <option value="">Select</option>
+          <option value="1">1st Year</option>
+          <option value="2">2nd Year</option>
+          <option value="3">3rd Year</option>
+          <option value="4">4th Year</option>
+        </select>
+      </div>
+      <div>
+        <label>Semester</label>
+        <input type="text" id="semester" placeholder="e.g. 5">
+      </div>
+    </div>
+
+    <label>Notes Text (optional)</label>
+    <textarea id="content" placeholder="Yahan text notes likho..."></textarea>
+
+    <label>PDF Upload (optional)</label>
+    <input type="file" id="pdf" accept="application/pdf">
+
+    <button id="submitBtn" onclick="submitNote()">Note Add Karo</button>
+    <div id="status"></div>
+  </div>
+
+  <div class="section-title">Existing Notes</div>
+  <div id="notesListAdmin"></div>
+
+  <a href="index.html" class="back-link">← Website pe wapas jao</a>
+</div>
+
+<script>
+async function submitNote() {
+  const password = document.getElementById("password").value;
+  const title = document.getElementById("title").value.trim();
+  const subject = document.getElementById("subject").value.trim();
+  const year = document.getElementById("year").value;
+  const semester = document.getElementById("semester").value.trim();
+  const content = document.getElementById("content").value.trim();
+  const pdfFile = document.getElementById("pdf").files[0];
+  const status = document.getElementById("status");
+  const btn = document.getElementById("submitBtn");
+
+  status.textContent = "";
+  status.className = "";
+
+  if (!password) {
+    status.textContent = "Password daalo.";
+    status.className = "error";
+    return;
+  }
+  if (!title || !subject) {
+    status.textContent = "Title aur Subject zaroori hai.";
+    status.className = "error";
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Adding...";
+
+  const formData = new FormData();
+  formData.append("password", password);
+  formData.append("title", title);
+  formData.append("subject", subject);
+  formData.append("year", year);
+  formData.append("semester", semester);
+  formData.append("content", content);
+  if (pdfFile) formData.append("pdf", pdfFile);
+
+  try {
+    const res = await fetch("/api/notes", { method: "POST", body: formData });
+    const data = await res.json();
+
+    if (!res.ok || data.error) throw new Error(data.error || "Kuch galat hua");
+
+    status.textContent = "Note add ho gaya!";
+    status.className = "success";
+
+    document.getElementById("title").value = "";
+    document.getElementById("subject").value = "";
+    document.getElementById("year").value = "";
+    document.getElementById("semester").value = "";
+    document.getElementById("content").value = "";
+    document.getElementById("pdf").value = "";
+
+    loadNotesAdmin();
+  } catch (err) {
+    status.textContent = "Error: " + err.message;
+    status.className = "error";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Note Add Karo";
+  }
+}
+
+async function loadNotesAdmin() {
+  const res = await fetch("/api/notes");
+  const notes = await res.json();
+  const list = document.getElementById("notesListAdmin");
+  list.innerHTML = "";
+
+  notes.forEach((note) => {
+    const item = document.createElement("div");
+    item.className = "note-item";
+    item.innerHTML = `
+      <span>${escapeHtml(note.title)} (${escapeHtml(note.subject)}${note.year ? ", Y" + note.year : ""})</span>
+      <button class="delete-btn" onclick="deleteNote('${note.id}')">Delete</button>
+    `;
+    list.appendChild(item);
+  });
+}
+
+async function deleteNote(id) {
+  const password = document.getElementById("password").value;
+  if (!password) {
+    alert("Pehle password daalo delete karne ke liye.");
+    return;
+  }
+  if (!confirm("Pakka delete karna hai?")) return;
+
+  const res = await fetch(`/api/notes/${id}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password }),
+  });
+  const data = await res.json();
+
+  if (!res.ok || data.error) {
+    alert("Error: " + (data.error || "Delete nahi hua"));
+    return;
+  }
+  loadNotesAdmin();
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+loadNotesAdmin();
+</script>
+
+</body>
+</html>

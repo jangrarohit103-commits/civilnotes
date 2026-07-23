@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivilNotes - Engineering Notes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+  body { background: #f6f7fb; color: #0f1b3d; padding-bottom: 70px; }
+
+  /* Top bar */
+  .topbar {
+    background: #0f1b3d;
+    color: white;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar .brand { display: flex; align-items: center; gap: 10px; }
+  .topbar .brand .icon { font-size: 24px; }
+  .topbar .brand h1 { font-size: 16px; line-height: 1.1; }
+  .topbar .brand p { font-size: 10px; color: #9aa5c9; }
+  .topbar .actions { display: flex; gap: 16px; font-size: 18px; }
+  .topbar .actions span { cursor: pointer; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(160deg, #dceafe, #eef3fd);
+    padding: 24px 16px 20px;
+  }
+  .hero h2 { font-size: 22px; line-height: 1.3; margin-bottom: 10px; }
+  .hero h2 .accent { color: #2563eb; }
+  .hero p { font-size: 13px; color: #445; margin-bottom: 16px; line-height: 1.5; }
+  .search-box {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .search-box input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    flex: 1;
+  }
+
+  /* Stats */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 16px;
+  }
+  .stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 10px 6px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+  .stat-card .icon { font-size: 18px; margin-bottom: 4px; }
+  .stat-card .num { font-size: 15px; font-weight: 700; }
+  .stat-card .label { font-size: 10px; color: #888; }
+
+  /* Section */
+  .section { padding: 6px 16px 20px; }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .section-head h3 { font-size: 17px; }
+  .section-head .view-all { font-size: 12px; color: #2563eb; cursor: pointer; }
+  .section-sub { font-size: 12px; color: #888; margin-bottom: 12px; }
+
+  /* Year grid */
+  .year-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .year-card {
+    background: white;
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    cursor: pointer;
+  }
+  .year-card .icon-box {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .year-card .info h4 { font-size: 14px; }
+  .year-card .info p { font-size: 11px; color: #888; }
+  .y1 .icon-box { background: #dbeafe; }
+  .y2 .icon-box { background: #dcfce7; }
+  .y3 .icon-box { background: #ede9fe; }
+  .y4 .icon-box { background: #ffedd5; }
+
+  /* Subjects scroll */
+  .subject-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+  .subject-card {
+    flex-shrink: 0;
+    width: 110px;
+    background: white;
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    cursor: pointer;
+  }
+  .subject-card .icon-circle {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: #eef0ff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin: 0 auto 8px;
+  }
+  .subject-card h5 { font-size: 12px; margin-bottom: 2px; }
+  .subject-card p { font-size: 10px; color: #999; }
+
+  .empty-hint { font-size: 12px; color: #aaa; padding: 10px 0; }
+
+  /* Notes list view */
+  #notesView { display: none; }
+  .back-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 16px 0;
+    font-size: 13px; color: #2563eb; cursor: pointer;
+  }
+  .filter-title { padding: 6px 16px 14px; font-size: 16px; font-weight: 600; }
+  .note-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 0 16px 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    cursor: pointer;
+  }
+  .note-card h3 { font-size: 15px; margin-bottom: 6px; }
+  .note-tag {
+    display: inline-block;
+    font-size: 10px;
+    background: #eef0ff;
+    color: #2563eb;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-right: 6px;
+  }
+  .note-preview { font-size: 12px; color: #777; margin-top: 8px; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed; top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    align-items: flex-end;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px;
+  }
+  .modal h2 { font-size: 19px; margin-bottom: 8px; }
+  .modal .tags { margin-bottom: 16px; }
+  .modal .content { font-size: 14px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 16px; }
+  .modal a.pdf-link {
+    display: inline-block;
+    background: #2563eb;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .modal .close-btn {
+    display: block;
+    text-align: center;
+    margin-top: 16px;
+    color: #999;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .bookmark-btn {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: white;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .bookmark-btn.active { background: #fef3c7; border-color: #fbbf24; }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0 10px;
+    border-top: 1px solid #eee;
+    z-index: 150;
+  }
+  .nav-item {
+    text-align: center;
+    font-size: 10px;
+    color: #999;
+    cursor: pointer;
+  }
+  .nav-item .nav-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+  .nav-item.active { color: #2563eb; }
+
+  .admin-link {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    color: #bbb;
+    font-size: 11px;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="icon">🎓</span>
+    <div>
+      <h1>CivilNotes</h1>
+      <p>Engineering Notes</p>
+    </div>
+  </div>
+  <div class="actions">
+    <span onclick="goToView('search')">🔍</span>
+  </div>
+</div>
+
+<!-- HOME VIEW -->
+<div id="homeView">
+  <div class="hero">
+    <h2>Your Smart Companion for <span class="accent">Civil Engineering</span> Notes</h2>
+    <p>Access well-structured notes, important topics and resources for all semesters — Anytime, Anywhere.</p>
+    <div class="search-box">
+      <span>🔍</span>
+      <input type="text" id="heroSearch" placeholder="Search notes by subject, topic or keyword..." onkeydown="if(event.key==='Enter') runSearch(this.value)">
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="icon">📘</div><div class="num" id="statNotes">0</div><div class="label">Notes</div></div>
+    <div class="stat-card"><div class="icon">📚</div><div class="num" id="statSubjects">0</div><div class="label">Subjects</div></div>
+    <div class="stat-card"><div class="icon">🎯</div><div class="num">4</div><div class="label">Years</div></div>
+    <div class="stat-card"><div class="icon">✅</div><div class="num">100%</div><div class="label">Free</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <h3>Explore Civil Engineering</h3>
+    </div>
+    <div class="section-sub">Choose your year to explore semester-wise notes</div>
+    <div class="year-grid">
+      <div class="year-card y1" onclick="filterByYear('1')">
+        <div class="icon-box">🏢</div>
+        <div class="info"><h4>1st Year</h4><p id="y1count">0 notes</p></div>
+      </div>
+      <div class="year-card y2" onclick="filterByYear('2')">
+        <div class="icon-box">🏗️</div>
+        <div class="info"><h4>2nd Year</h4><p id="y2count">0 notes</p></div>
+      </div>
+      <div class="year-card y3" onclick="filterByYear('3')">
+        <div class="icon-box">🏛️</div>
+        <div class="info"><h4>3rd Year</h4><p id="y3count">0 notes</p></div>
+      </div>
+      <div class="year-card y4" onclick="filterByYear('4')">
+        <div class="icon-box">🌉</div>
+        <div class="info"><h4>4th Year</h4><p id="y4count">0 notes</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <h3>Popular Subjects</h3>
+      <span class="view-all" onclick="goToView('subjects')">View All →</span>
+    </div>
+    <div class="subject-scroll" id="subjectScroll"></div>
+  </div>
+</div>
+
+<!-- SUBJECTS VIEW -->
+<div id="subjectsView" style="display:none;">
+  <div class="back-row" onclick="goToView('home')">← Home</div>
+  <div class="filter-title">All Subjects</div>
+  <div class="section" style="padding-top:0;">
+    <div id="allSubjectsGrid" class="year-grid"></div>
+  </div>
+</div>
+
+<!-- SEARCH VIEW -->
+<div id="searchView" style="display:none;">
+  <div class="back-row" onclick="goToView('home')">← Home</div>
+  <div class="section" style="padding-top:10px;">
+    <div class="search-box" style="margin-bottom:14px;">
+      <span>🔍</span>
+      <input type="text" id="searchInput" placeholder="Search notes..." onkeydown="if(event.key==='Enter') runSearch(this.value)">
+    </div>
+  </div>
+  <div id="searchResults"></div>
+</div>
+
+<!-- BOOKMARKS VIEW -->
+<div id="bookmarksView" style="display:none;">
+  <div class="back-row" onclick="goToView('home')">← Home</div>
+  <div class="filter-title">Bookmarked Notes</div>
+  <div id="bookmarksList"></div>
+</div>
+
+<!-- NOTES LIST VIEW (filtered) -->
+<div id="notesView">
+  <div class="back-row" onclick="goToView('home')">← Home</div>
+  <div class="filter-title" id="notesViewTitle">Notes</div>
+  <div id="notesListContainer"></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitle"></h2>
+    <div class="tags" id="modalTags"></div>
+    <div class="content" id="modalContent"></div>
+    <div id="modalPdfWrap"></div>
+    <button class="bookmark-btn" id="bookmarkBtn" onclick="toggleBookmark()">☆ Bookmark</button>
+    <div class="close-btn" onclick="closeModal()">Band karo</div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <div class="nav-item active" id="navHome" onclick="goToView('home')"><span class="nav-icon">🏠</span>Home</div>
+  <div class="nav-item" id="navSubjects" onclick="goToView('subjects')"><span class="nav-icon">📚</span>Subjects</div>
+  <div class="nav-item" id="navSearch" onclick="goToView('search')"><span class="nav-icon">🔍</span>Search</div>
+  <div class="nav-item" id="navBookmarks" onclick="goToView('bookmarks')"><span class="nav-icon">🔖</span>Bookmarks</div>
+</div>
+
+<a href="admin.html" class="admin-link">Admin Panel</a>
+
+<script>
+let allNotes = [];
+let allSubjects = [];
+let currentNote = null;
+const subjectIcons = ["📐","⚙️","🏗️","💧","🧱","🔩","🌍","📏","🛣️","🏢"];
+
+function getBookmarks() {
+  return JSON.parse(localStorage.getItem("bookmarks") || "[]");
+}
+function setBookmarks(arr) {
+  localStorage.setItem("bookmarks", JSON.stringify(arr));
+}
+
+async function loadStats() {
+  const res = await fetch("/api/stats");
+  const stats = await res.json();
+  document.getElementById("statNotes").textContent = stats.totalNotes;
+  document.getElementById("statSubjects").textContent = stats.totalSubjects;
+  document.getElementById("y1count").textContent = stats.yearCounts["1"] + " notes";
+  document.getElementById("y2count").textContent = stats.yearCounts["2"] + " notes";
+  document.getElementById("y3count").textContent = stats.yearCounts["3"] + " notes";
+  document.getElementById("y4count").textContent = stats.yearCounts["4"] + " notes";
+}
+
+async function loadSubjects() {
+  const res = await fetch("/api/subjects");
+  allSubjects = await res.json();
+
+  const scroll = document.getElementById("subjectScroll");
+  scroll.innerHTML = "";
+  if (allSubjects.length === 0) {
+    scroll.innerHTML = `<div class="empty-hint">Abhi koi subject nahi hai. Admin panel se notes add karo.</div>`;
+  }
+  allSubjects.slice(0, 8).forEach((s, i) => {
+    const card = document.createElement("div");
+    card.className = "subject-card";
+    card.onclick = () => filterBySubject(s.name);
+    card.innerHTML = `
+      <div class="icon-circle">${subjectIcons[i % subjectIcons.length]}</div>
+      <h5>${escapeHtml(s.name)}</h5>
+      <p>${s.count} notes</p>
+    `;
+    scroll.appendChild(card);
+  });
+
+  const grid = document.getElementById("allSubjectsGrid");
+  grid.innerHTML = "";
+  allSubjects.forEach((s, i) => {
+    const card = document.createElement("div");
+    card.className = "year-card";
+    card.onclick = () => filterBySubject(s.name);
+    card.innerHTML = `
+      <div class="icon-box" style="background:#eef0ff;">${subjectIcons[i % subjectIcons.length]}</div>
+      <div class="info"><h4>${escapeHtml(s.name)}</h4><p>${s.count} notes</p></div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+async function filterByYear(year) {
+  const res = await fetch(`/api/notes?year=${year}`);
+  const notes = await res.json();
+  renderNotesView(`Year ${year} Notes`, notes);
+}
+
+async function filterBySubject(subject) {
+  const res = await fetch(`/api/notes?subject=${encodeURIComponent(subject)}`);
+  const notes = await res.json();
+  renderNotesView(subject, notes);
+}
+
+async function runSearch(query) {
+  if (!query.trim()) return;
+  goToView("search");
+  document.getElementById("searchInput").value = query;
+  const res = await fetch(`/api/notes?q=${encodeURIComponent(query)}`);
+  const notes = await res.json();
+  const container = document.getElementById("searchResults");
+  container.innerHTML = "";
+  if (notes.length === 0) {
+    container.innerHTML = `<div class="empty-hint" style="padding:0 16px;">Koi result nahi mila.</div>`;
+    return;
+  }
+  notes.forEach((n) => container.appendChild(buildNoteCard(n)));
+}
+
+function renderNotesView(title, notes) {
+  document.getElementById("notesViewTitle").textContent = title;
+  const container = document.getElementById("notesListContainer");
+  container.innerHTML = "";
+  if (notes.length === 0) {
+    container.innerHTML = `<div class="empty-hint" style="padding:0 16px;">Is category mein abhi koi notes nahi hain.</div>`;
+  } else {
+    notes.forEach((n) => container.appendChild(buildNoteCard(n)));
+  }
+  showOnly("notesView");
+}
+
+function buildNoteCard(note) {
+  const card = document.createElement("div");
+  card.className = "note-card";
+  card.onclick = () => openModal(note);
+  card.innerHTML = `
+    <h3>${escapeHtml(note.title)}</h3>
+    <span class="note-tag">${escapeHtml(note.subject)}</span>
+    ${note.year ? `<span class="note-tag">Year ${escapeHtml(note.year)}</span>` : ""}
+    ${note.semester ? `<span class="note-tag">Sem ${escapeHtml(note.semester)}</span>` : ""}
+    ${note.pdfFile ? `<span class="note-tag">📎 PDF</span>` : ""}
+    ${note.content ? `<div class="note-preview">${escapeHtml(note.content.slice(0, 90))}...</div>` : ""}
+  `;
+  return card;
+}
+
+function openModal(note) {
+  currentNote = note;
+  document.getElementById("modalTitle").textContent = note.title;
+  document.getElementById("modalTags").innerHTML = `
+    <span class="note-tag">${escapeHtml(note.subject)}</span>
+    ${note.year ? `<span class="note-tag">Year ${escapeHtml(note.year)}</span>` : ""}
+    ${note.semester ? `<span class="note-tag">Sem ${escapeHtml(note.semester)}</span>` : ""}
+  `;
+  document.getElementById("modalContent").textContent = note.content || "";
+  const pdfWrap = document.getElementById("modalPdfWrap");
+  pdfWrap.innerHTML = note.pdfFile
+    ? `<a class="pdf-link" href="/uploads/${note.pdfFile}" download>⬇ PDF Download karo</a>`
+    : "";
+
+  const bookmarks = getBookmarks();
+  const btn = document.getElementById("bookmarkBtn");
+  btn.classList.toggle("active", bookmarks.includes(note.id));
+  btn.textContent = bookmarks.includes(note.id) ? "★ Bookmarked" : "☆ Bookmark";
+
+  document.getElementById("modalOverlay").classList.add("open");
+}
+
+function toggleBookmark() {
+  if (!currentNote) return;
+  let bookmarks = getBookmarks();
+  const btn = document.getElementById("bookmarkBtn");
+  if (bookmarks.includes(currentNote.id)) {
+    bookmarks = bookmarks.filter((id) => id !== currentNote.id);
+    btn.classList.remove("active");
+    btn.textContent = "☆ Bookmark";
+  } else {
+    bookmarks.push(currentNote.id);
+    btn.classList.add("active");
+    btn.textContent = "★ Bookmarked";
+  }
+  setBookmarks(bookmarks);
+}
+
+function closeModal() {
+  document.getElementById("modalOverlay").classList.remove("open");
+}
+
+async function loadBookmarksView() {
+  const ids = getBookmarks();
+  const list = document.getElementById("bookmarksList");
+  list.innerHTML = "";
+  if (ids.length === 0) {
+    list.innerHTML = `<div class="empty-hint" style="padding:0 16px;">Koi bookmark nahi hai abhi.</div>`;
+    return;
+  }
+  const res = await fetch("/api/notes");
+  const notes = await res.json();
+  const bookmarked = notes.filter((n) => ids.includes(n.id));
+  bookmarked.forEach((n) => list.appendChild(buildNoteCard(n)));
+}
+
+function showOnly(viewId) {
+  ["homeView", "subjectsView", "searchView", "bookmarksView", "notesView"].forEach((id) => {
+    document.getElementById(id).style.display = id === viewId ? "block" : "none";
+  });
+}
+
+function goToView(view) {
+  const map = {
+    home: "homeView",
+    subjects: "subjectsView",
+    search: "searchView",
+    bookmarks: "bookmarksView",
+  };
+  showOnly(map[view]);
+
+  document.querySelectorAll(".nav-item").forEach((n) => n.classList.remove("active"));
+  const navMap = { home: "navHome", subjects: "navSubjects", search: "navSearch", bookmarks: "navBookmarks" };
+  if (navMap[view]) document.getElementById(navMap[view]).classList.add("active");
+
+  if (view === "bookmarks") loadBookmarksView();
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+loadStats();
+loadSubjects();
+</script>
+
+</body>
+</html>
